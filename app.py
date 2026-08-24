@@ -1493,6 +1493,8 @@ def _load_ag_data_internal():
         return False, str(e)
 
 def _start_ag_loading():
+    import time
+    time.sleep(5)
     print("Starting background load of AG Validation Data...")
     try:
         ok, err = _load_ag_data_internal()
@@ -1504,6 +1506,7 @@ def _start_ag_loading():
         print("AG Validation load crashed:", e)
 
 threading.Thread(target=_start_ag_loading, daemon=True).start()
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Helpers
