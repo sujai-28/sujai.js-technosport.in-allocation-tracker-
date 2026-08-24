@@ -1408,7 +1408,7 @@ def _load_ag_data_internal():
         df_store_merged['CM'] = df_store_merged['store_code'].map(cm_dict).fillna('Unmapped')
 
         # Sort by store wise priority
-        priority_dir = r"D:\INCREFF ORDER PUNCH\ag validation priority"
+        priority_dir = os.path.join(os.path.dirname(__file__), "ag validation priority")
         store_pri_file = os.path.join(priority_dir, "Store wise May sales qty.xlsx")
         store_pri_dict = {}
         if os.path.exists(store_pri_file):
