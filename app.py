@@ -1219,7 +1219,9 @@ def _start_background_loading():
     except Exception as e:
         print("Background load of Top 100 Styles Data crashed:", e)
 
-threading.Thread(target=_start_background_loading, daemon=True).start()
+# All data is loaded on-demand to prevent OOM crash on Render 512MB free plan.
+# Click the "Reload Data" button in each tab to load data after app starts.
+# threading.Thread(target=_start_background_loading, daemon=True).start()
 
 # ── AG Validation Loading ────────────────────────────────────────────────────
 AG_VALIDATION_DIR = os.path.join(os.path.dirname(__file__), "AG VALIDATION DATA", "AG WORKING")
