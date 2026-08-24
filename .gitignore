@@ -12,3 +12,4 @@ ENV/
 app_error.log
 app_output.log
 *.tmp
+~$*
