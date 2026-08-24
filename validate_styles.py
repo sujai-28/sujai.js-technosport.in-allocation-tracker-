@@ -20,10 +20,11 @@ def clean_store_code(val):
 
 def main():
     print("Finding data files...")
-    stock_dir = r"D:\INCREFF ORDER PUNCH\ebo stock track data\current stock"
-    transit_dir = r"D:\INCREFF ORDER PUNCH\ebo stock track data\intransit"
-    alloc_dir = r"D:\INCREFF ORDER PUNCH\ebo stock track data\ALLOCATION"
-    ag_dir = r"D:\INCREFF ORDER PUNCH\ebo stock track data\STYLE WISE AG"
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    stock_dir = os.path.join(base_dir, "ebo stock track data", "current stock")
+    transit_dir = os.path.join(base_dir, "ebo stock track data", "intransit")
+    alloc_dir = os.path.join(base_dir, "ebo stock track data", "ALLOCATION")
+    ag_dir = os.path.join(base_dir, "ebo stock track data", "STYLE WISE AG")
     
     stock_file = get_latest_file(stock_dir, '*.xlsx')
     transit_file = get_latest_file(transit_dir, '*.xlsx')
@@ -192,7 +193,7 @@ def main():
     df_store_ag_out = pd.concat([store_ag_all, store_ag_st, store_ag_stock], axis=1).fillna(0).reset_index()
     
     # LOAD AG WORKING FOR CAPPING
-    ag_working_dir = r"D:\INCREFF ORDER PUNCH\AG VALIDATION DATA\AG WORKING"
+    ag_working_dir = os.path.join(base_dir, "AG VALIDATION DATA", "AG WORKING")
     ag_working_file = get_latest_file(ag_working_dir, '*.xlsx')
     
     if ag_working_file:
@@ -239,7 +240,7 @@ def main():
     # ------------------
     # LOAD PRIORITY LISTS FOR SORTING
     # ------------------
-    priority_dir = r"D:\INCREFF ORDER PUNCH\ag validation priority"
+    priority_dir = os.path.join(base_dir, "ag validation priority")
     store_pri_file = os.path.join(priority_dir, "Store wise May sales qty.xlsx")
     style_pri_file = os.path.join(priority_dir, "Style wise May Bill qty (1).xlsx")
     
@@ -403,7 +404,7 @@ def main():
     
     # Load CM mapping
     cm_dict = {}
-    cm_file = r"D:\INCREFF ORDER PUNCH\AG VALIDATION DATA\CM\Name_Zones (2).xlsx"
+    cm_file = os.path.join(base_dir, "AG VALIDATION DATA", "CM", "Name_Zones (2).xlsx")
     if os.path.exists(cm_file):
         try:
             df_cm = pd.read_excel(cm_file, sheet_name="Sheet1")
@@ -481,7 +482,7 @@ def main():
     
     from datetime import datetime
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_file = r"D:\INCREFF ORDER PUNCH\VALID STYLE OUTPUT\AG_Validation_Output_v2_" + timestamp + ".xlsx"
+    out_file = os.path.join(base_dir, "VALID STYLE OUTPUT", f"AG_Validation_Output_v2_{timestamp}.xlsx")
     os.makedirs(os.path.dirname(out_file), exist_ok=True)
     print(f"Writing to {out_file}...")
     
@@ -492,7 +493,7 @@ def main():
         df_style_out.to_excel(writer, sheet_name='STYLE WISE', index=False)
         
         # Load and write CM sheet
-        cm_file = r"D:\INCREFF ORDER PUNCH\AG VALIDATION DATA\CM\Name_Zones (2).xlsx"
+        cm_file = os.path.join(base_dir, "AG VALIDATION DATA", "CM", "Name_Zones (2).xlsx")
         if os.path.exists(cm_file):
             try:
                 df_cm = pd.read_excel(cm_file, sheet_name="Sheet1")
@@ -503,11 +504,9 @@ def main():
         
     print("Done!")
     
-    # Also update app.py reference if we need to? 
-    # Let's save a "latest" copy as well if possible, or just copy to a fixed path if we can.
     try:
         import shutil
-        shutil.copy(out_file, r"D:\INCREFF ORDER PUNCH\VALID STYLE OUTPUT\AG_Validation_Output_v2_LATEST.xlsx")
+        shutil.copy(out_file, os.path.join(base_dir, "VALID STYLE OUTPUT", "AG_Validation_Output_v2_LATEST.xlsx"))
     except Exception as e:
         print(f"Could not save LATEST copy: {e}")
 

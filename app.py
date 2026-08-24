@@ -510,7 +510,7 @@ def _load_new_style_data_internal():
     import glob
     import os
     import pandas as pd
-    folder = r"D:\INCREFF ORDER PUNCH\new style performance"
+    folder = os.path.join(os.path.dirname(__file__), "new style performance")
     if not os.path.exists(folder):
         return False, "Folder 'new style performance' does not exist."
     
@@ -1247,7 +1247,7 @@ def _load_ag_data_internal():
         
     try:
         # Load CM mapping
-        cm_file = r"D:\INCREFF ORDER PUNCH\AG VALIDATION DATA\CM\Name_Zones (2).xlsx"
+        cm_file = os.path.join(os.path.dirname(__file__), "AG VALIDATION DATA", "CM", "Name_Zones (2).xlsx")
         cm_dict = {}
         loaded_cm = False
         if os.path.exists(cm_file):
