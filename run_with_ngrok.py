@@ -1,8 +1,14 @@
 import os
 import sys
+import threading
 from pyngrok import ngrok
+from auto_sync import watch_loop
 
 def main():
+    # Start auto-sync watcher in background thread
+    sync_thread = threading.Thread(target=watch_loop, kwargs={'interval': 30}, daemon=True)
+    sync_thread.start()
+
     print("=" * 55)
     print("  Starting Ngrok Tunnel...")
     print("=" * 55)
@@ -27,3 +33,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
