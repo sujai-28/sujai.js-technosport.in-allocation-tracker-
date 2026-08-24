@@ -1246,8 +1246,10 @@ def _load_ag_data_internal():
         path_new = max(files_new, key=os.path.getmtime) if files_new else None
     
     if not path_alloc or not path_new:
-        _state["ag_status"] = {"loaded": False, "error": "Missing Allocation or Valid Style Output files.", "last_loaded": None}
-        return False, "Missing required files."
+        err_msg = f"Missing required files. path_alloc={path_alloc}, path_new={path_new}"
+        print(err_msg)
+        _state["ag_status"] = {"loaded": False, "error": err_msg, "last_loaded": None}
+        return False, err_msg
         
     try:
         # Load CM mapping
