@@ -59,9 +59,13 @@ _state = {
 }
 
 def _read_excel_fast(path, sheet_name=None, header_row=0):
-    # Use pandas read_excel with calamine engine for extremely fast parsing
+    # Use pandas read_excel with calamine engine if available, fallback to openpyxl
     s_name = sheet_name if sheet_name is not None else 0
-    df = pd.read_excel(path, sheet_name=s_name, header=header_row, engine='calamine')
+    try:
+        df = pd.read_excel(path, sheet_name=s_name, header=header_row, engine='calamine')
+    except (ImportError, ValueError, Exception):
+        df = pd.read_excel(path, sheet_name=s_name, header=header_row, engine='openpyxl')
+
     
     # Strip whitespace from column names and clean named/unnamed columns
     new_cols = []
