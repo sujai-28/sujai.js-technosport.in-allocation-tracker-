@@ -2209,34 +2209,75 @@ def ebo_summary():
 
 @app.route("/api/ag_data")
 def ag_data():
-    return jsonify({
-        "status": _state.get("ag_status"),
-        "store_data": _state.get("ag_store_data", []),
-        "ag_data": _state.get("ag_wise_data", []),
-        "raw_data": _state.get("ag_raw_data", []),
-        "style_data": _state.get("ag_style_data", []),
-        "style_cols": _state.get("ag_style_cols", []),
-        "store_cols": [
-            'store_code', 'Store Name', 'Sum of Final Options',
-            'Sum of Final Options - M', 'Sum of Final Options - W', 'Sum of Final Options - K',
-            'Only Stock Valid Options', 'Only Stock Valid Options - M', 'Only Stock Valid Options - W', 'Only Stock Valid Options - K',
-            'Stock and Transit Valid Options', 'Stock and Transit Valid Options - M', 'Stock and Transit Valid Options - W', 'Stock and Transit Valid Options - K',
-            'All Valid Options', 'All Valid Options - M', 'All Valid Options - W', 'All Valid Options - K'
-        ],
-        "ag_cols": ['AG Name', 'Sum of Final Options', 'Only Stock Valid Options', 'Stock and Transit Valid Options', 'All Valid Options']
-    })
+    cache_path = os.path.join(os.path.dirname(__file__), "ag_data_cache.json")
+    # Serve from pre-processed JSON cache (near-zero RAM usage)
+    if _state.get("ag_store_data") is not None and len(_state.get("ag_store_data", [])) > 0:
+        # Already loaded in memory - serve directly
+        return jsonify({
+            "status": _state.get("ag_status"),
+            "store_data": _state.get("ag_store_data", []),
+            "ag_data": _state.get("ag_wise_data", []),
+            "raw_data": _state.get("ag_raw_data", []),
+            "style_data": _state.get("ag_style_data", []),
+            "style_cols": _state.get("ag_style_cols", []),
+            "store_cols": [
+                'store_code', 'Store Name', 'Sum of Final Options',
+                'Sum of Final Options - M', 'Sum of Final Options - W', 'Sum of Final Options - K',
+                'Only Stock Valid Options', 'Only Stock Valid Options - M', 'Only Stock Valid Options - W', 'Only Stock Valid Options - K',
+                'Stock and Transit Valid Options', 'Stock and Transit Valid Options - M', 'Stock and Transit Valid Options - W', 'Stock and Transit Valid Options - K',
+                'All Valid Options', 'All Valid Options - M', 'All Valid Options - W', 'All Valid Options - K'
+            ],
+            "ag_cols": ['AG Name', 'Sum of Final Options', 'Only Stock Valid Options', 'Stock and Transit Valid Options', 'All Valid Options']
+        })
+    elif os.path.exists(cache_path):
+        # Load from pre-processed JSON cache (lightweight, no Excel processing)
+        import json
+        with open(cache_path, "r", encoding="utf-8") as f:
+            cache = json.load(f)
+        # Store in _state for subsequent requests
+        _state["ag_store_data"] = cache.get("store_data", [])
+        _state["ag_wise_data"] = cache.get("ag_data", [])
+        _state["ag_raw_data"] = cache.get("raw_data", [])
+        _state["ag_style_data"] = cache.get("style_data", [])
+        _state["ag_style_cols"] = cache.get("style_cols", [])
+        _state["ag_status"] = cache.get("status", {"loaded": True, "error": None, "last_loaded": None})
+        _state["ag_status"]["loaded"] = True
+        return jsonify(cache)
+    else:
+        return jsonify({
+            "status": {"loaded": False, "error": "No cache file found. Run export_ag_cache.py locally and push to GitHub.", "last_loaded": None},
+            "store_data": [], "ag_data": [], "raw_data": [], "style_data": [],
+            "style_cols": [],
+            "store_cols": [
+                'store_code', 'Store Name', 'Sum of Final Options',
+                'Sum of Final Options - M', 'Sum of Final Options - W', 'Sum of Final Options - K',
+                'Only Stock Valid Options', 'Only Stock Valid Options - M', 'Only Stock Valid Options - W', 'Only Stock Valid Options - K',
+                'Stock and Transit Valid Options', 'Stock and Transit Valid Options - M', 'Stock and Transit Valid Options - W', 'Stock and Transit Valid Options - K',
+                'All Valid Options', 'All Valid Options - M', 'All Valid Options - W', 'All Valid Options - K'
+            ],
+            "ag_cols": ['AG Name', 'Sum of Final Options', 'Only Stock Valid Options', 'Stock and Transit Valid Options', 'All Valid Options']
+        })
 
 @app.route("/api/ag_reload", methods=["POST"])
 def ag_reload():
-    def _do_reload():
-        _load_ag_data_internal()
+    """Load AG data from the pre-processed JSON cache (lightweight, no Excel processing on server)."""
+    cache_path = os.path.join(os.path.dirname(__file__), "ag_data_cache.json")
+    if os.path.exists(cache_path):
+        import json
+        with open(cache_path, "r", encoding="utf-8") as f:
+            cache = json.load(f)
+        _state["ag_store_data"] = cache.get("store_data", [])
+        _state["ag_wise_data"] = cache.get("ag_data", [])
+        _state["ag_raw_data"] = cache.get("raw_data", [])
+        _state["ag_style_data"] = cache.get("style_data", [])
+        _state["ag_style_cols"] = cache.get("style_cols", [])
+        _state["ag_status"] = cache.get("status", {"loaded": True, "error": None, "last_loaded": None})
+        _state["ag_status"]["loaded"] = True
+        return jsonify({"ok": True, "message": f"Loaded {len(_state['ag_store_data'])} stores from cache.", "status": _state["ag_status"]})
+    else:
+        return jsonify({"ok": False, "error": "No cache file found. Run export_ag_cache.py locally and push to GitHub."})
 
-    threading.Thread(target=_do_reload, daemon=True).start()
-    return jsonify({
-        "ok": True,
-        "message": "AG Validation data reload triggered in background.",
-        "status": _state.get("ag_status")
-    })
+
 
 
 @app.route("/api/ag_download")
