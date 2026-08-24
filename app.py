@@ -1507,7 +1507,8 @@ def _start_ag_loading():
     except Exception as e:
         print("AG Validation load crashed:", e)
 
-threading.Thread(target=_start_ag_loading, daemon=True).start()
+# AG Validation data is loaded on-demand via the Reload Data button
+# (disabled auto-start to prevent OOM on Render 512MB free plan)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
