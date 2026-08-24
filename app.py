@@ -2216,12 +2216,16 @@ def ag_data():
 
 @app.route("/api/ag_reload", methods=["POST"])
 def ag_reload():
-    ok, error = _load_ag_data_internal()
+    def _do_reload():
+        _load_ag_data_internal()
+
+    threading.Thread(target=_do_reload, daemon=True).start()
     return jsonify({
-        "ok": ok,
-        "error": error,
+        "ok": True,
+        "message": "AG Validation data reload triggered in background.",
         "status": _state.get("ag_status")
     })
+
 
 @app.route("/api/ag_download")
 def ag_download():

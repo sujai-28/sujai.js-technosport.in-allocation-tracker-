@@ -4069,8 +4069,8 @@
                 const res = await fetch('/api/ag_reload', { method: 'POST' });
                 const data = await res.json();
                 if (data.ok) {
-                    showToast("AG Validation Data Reloaded!", false);
-                    loadAgData();
+                    showToast("AG Validation reloading in background...", false);
+                    setTimeout(loadAgData, 3000);
                 } else {
                     showToast(data.error || "Failed to reload", true);
                 }
