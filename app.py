@@ -1237,9 +1237,13 @@ def _load_ag_data_internal():
             path_alloc = max(alloc_files, key=os.path.getmtime)
     
     valid_style_dir = os.path.join(os.path.dirname(__file__), "VALID STYLE OUTPUT")
-    files_new = glob.glob(os.path.join(valid_style_dir, "*.xlsx"))
-    files_new = [f for f in files_new if not os.path.basename(f).startswith('~')]
-    path_new = max(files_new, key=os.path.getmtime) if files_new else None
+    latest_file_path = os.path.join(valid_style_dir, "AG_Validation_Output_v2_LATEST.xlsx")
+    if os.path.exists(latest_file_path):
+        path_new = latest_file_path
+    else:
+        files_new = glob.glob(os.path.join(valid_style_dir, "*.xlsx"))
+        files_new = [f for f in files_new if not os.path.basename(f).startswith('~')]
+        path_new = max(files_new, key=os.path.getmtime) if files_new else None
     
     if not path_alloc or not path_new:
         _state["ag_status"] = {"loaded": False, "error": "Missing Allocation or Valid Style Output files.", "last_loaded": None}
